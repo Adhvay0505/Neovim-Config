@@ -231,21 +231,51 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- Set filetype-specific settings
+-- Lua: 2 spaces (NeoVim config style)
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup,
-  pattern = { "lua", "python" },
-  callback = function()
-    vim.opt_local.tabstop = 4
-    vim.opt_local.shiftwidth = 4
-  end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = { "javascript", "typescript", "json", "html", "css" },
+  pattern = { "lua" },
   callback = function()
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+  end,
+})
+
+-- Python: 4 spaces (PEP 8 standard)
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
+  pattern = { "python" },
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.softtabstop = 4
+    vim.opt_local.expandtab = true
+  end,
+})
+
+-- Go: Real tabs (official Go style)
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
+  pattern = { "go" },
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.softtabstop = 4
+    vim.opt_local.expandtab = false  -- Use actual tabs, not spaces
+  end,
+})
+
+-- Bash/Shell: 2 spaces (common shell script style)
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
+  pattern = { "sh", "bash" },
+  callback = function()
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
   end,
 })
 
@@ -434,30 +464,19 @@ local function git_branch()
   return ""
 end
 
--- File type with icon
+-- File type detected from extension
 local function file_type()
-  local ft = vim.bo.filetype
-  local icons = {
-    lua = "LUA",
-    python = "PY",
-    javascript = "JS",
-    typescript = "TS",
-    html = "HTML",
-    css = "CSS",
-    json = "JSON",
-    markdown = "MD",
-    vim = "VIM",
-    sh = "SH",
-    go = "GO",
-    rust = "RS",
-    c = "C",
-    cpp = "CPP",
-    java = "JAVA",
-  }
-  if ft == "" then
+  local filename = vim.fn.expand('%:t')
+  if filename == "" then
     return "  "
   end
-  return (icons[ft] or ft:upper())
+  
+  local ext = vim.fn.expand('%:e')
+  if ext ~= "" then
+    return ext:upper()
+  end
+  
+  return vim.bo.filetype:upper()
 end
 
 -- Word count for text files
